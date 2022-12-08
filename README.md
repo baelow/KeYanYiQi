@@ -15,12 +15,17 @@
 
 2. 密码：需要AES加密密码，密码获取方式如下：
 
+    **方法一：**
+
    * 打开环境学院仪器预约平台网址 http://210.31.67.135/
 
    * 右键，检查（Edge或Chrome浏览器），点击右边的Console（调试）
    * 输入`hex_en_aes("你的登录密码")`，点击回车`enter`，即可获取加密密码。复制引号内部的密码并粘贴至软件内
    * 如图所示![](img_for_readme/mm.png)
 
+    **方法二：**
+      * 打开文件夹下的 获取加密密码.html 进行加密转化即可。
+  
 3. 仪器编码：本软件内置 LC，LCMSMS，ZETA，可直接输入名称，其他的需要手动输入仪器编码，操作如下：
    * 打开所需要预约仪器的网页，复制url中的仪器id，如`http://210.31.67.135/Equipment/Show?Id=442af9f3-ebba-4d76-81bc-0c89f4bb685e&ParUrl=undefined`中，仪器编码为**442af9f3-ebba-4d76-81bc-0c89f4bb685e**，将其粘贴至软件内。
    * ![](img_for_readme/yqid.png)
