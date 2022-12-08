@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>获取加密密码 get encode password</title>
+
+<script src="./encode/core.js"></script>
+<script src="./encode/enc-base64.js"></script>
+<script src="./encode/cipher-core-min.js"></script>
+<script src="./encode/mode-ecb-min.js"></script>
+<script src="./encode/md.js"></script>
+<script src="./encode/aes.js"></script> 
+<script src="./encode/aesfun.js"></script>
+
+<script>
+function display_real_pw(){
+	var data = document.getElementById("raw_pw").value;
+    document.getElementById("real_pw").innerHTML = '>>> Result:    \n\n'+ hex_en_aes(data)
+}
+</script>
+</head>
+<body>
+
+<h1>Encode PW</h1>
+<form>
+    INPUT YOUR PASSWORD : <input type="text" id="raw_pw"><br>
+</form><br>
+<button type="button" onclick="display_real_pw()"> >>> Calculate <<<  </button><br><br>
+<pre><p id = "real_pw"></p></pre>
+</body>
+</html>
