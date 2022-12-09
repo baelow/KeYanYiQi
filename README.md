@@ -7,6 +7,10 @@
 ## 软件下载说明
 本软件仅提供windows版本下载。直接下载for windows文件夹内文件即可。
 
+[直链下载](https://minhaskamal.github.io/DownGit/#/home?url=https:%2F%2Fgithub.com%2Fbaelow%2FKeYanYiQi%2Ftree%2Fmain%2Ffor%20windows)
+或者git clone 或者如下：
+![](img_for_readme/download.png)
+
 ## 软件使用说明
 
 ![软件截图](img_for_readme/p.png)
