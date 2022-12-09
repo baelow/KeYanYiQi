@@ -33,7 +33,7 @@
 		}
 
 		.title {
-			line-height: 58px;
+			line-height: 58px auto;
 			margin-top: 20px;
 			font-size: 36px;
 			color: #000;
@@ -77,7 +77,23 @@
 			background-color: #B721FF;
 			color: #fff;
 		}
+
+		.word {
+			text-align: center;
+			line-height: 30px auto;
+			margin-top: 50px;
+			font-size: 10px;
+			color: rgb(135, 135, 135);
+			height: 38px;
+		}
 	</style>
+	<script src="./encode/core.js"></script>
+	<script src="./encode/enc-base64.js"></script>
+	<script src="./encode/cipher-core-min.js"></script>
+	<script src="./encode/mode-ecb-min.js"></script>
+	<script src="./encode/md.js"></script>
+	<script src="./encode/aes.js"></script>
+	<script src="./encode/aesfun.js"></script>
 </head>
 
 <body>
@@ -95,16 +111,11 @@
 			</div>
 		</div>
 	</div>
-
+	<br>
+	<div id="content2">
+		<div class="word">2021-2022 An BNUer of Beijing Normal University</div>
+	</div>
 </body>
-
-<script src="./encode/core.js"></script>
-<script src="./encode/enc-base64.js"></script>
-<script src="./encode/cipher-core-min.js"></script>
-<script src="./encode/mode-ecb-min.js"></script>
-<script src="./encode/md.js"></script>
-<script src="./encode/aes.js"></script>
-<script src="./encode/aesfun.js"></script>
 
 <script type="text/javascript">
 	function run() {
@@ -121,5 +132,6 @@
 		}
 	}
 </script>
+
 
 </html>
