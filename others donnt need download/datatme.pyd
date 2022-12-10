@@ -1,256 +1,234 @@
-import datetime
-import re
-import time
-import requests
-import random
-import schedule
-
-
-class ApplyIns:
-    def __init__(self, un, pw, equipmentID, apply_day_later, starttime,SubjectName):
-        self.username = un
-        self.password = pw
-        self.equipmentID = equipmentID
-        self.apply_day_later = apply_day_later
-        self.time_setting = starttime
-        self.subject_name = SubjectName
-        self.cook = None
-        self.cook2 = None
-        self.cook3 = None
-        self.bookday = None
-        self.GoOn = None
-        self.over = None
-        self.result_show = []
-
-    def deal_equipmentID(self):
-        if self.equipmentID == 'ZETA':
-            self.equipmentID = 'f8cd1e48-6bc4-4226-a623-e9db326452ab'  # zeta
-        elif self.equipmentID == 'LC':
-            self.equipmentID = '770b0366-4552-452e-bb95-475d1701e340'  # 3200
-        elif self.equipmentID == 'LCMSMS':
-            self.equipmentID = 'c26681cc-0590-4db7-a94a-2986b44673cc'  # 4500
-
-    def time_pre(self, timestr):
-        time_str = '2022-04-01 ' + timestr
-        time_sec = time.mktime(time.strptime(time_str, '%Y-%m-%d %H:%M:%S')) - 10
-        timeArray = time.localtime(time_sec)
-        time2 = time.strftime('%H:%M:%S', timeArray)
-        return time2
-
-    def login_pre(self):
-        # global cook
-        header = {
-            'User-Agernt': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36',
-            'Host': '210.31.67.135', 'Connection': 'keep-alive'}
-        url = 'http://210.31.67.135/Equipment/Show?Id=770b0366-4552-452e-bb95-475d1701e340&ParUrl=undefined'
-        r = requests.get(url=url, headers=header)
-        self.cook = re.findall('(ASP[\s\S]*?)\sfor', str(r.cookies))[0]
-
-    def login(self):
-        # global cook2
-        url2 = 'http://210.31.67.135/Account/LoginSubmit'
-        postdata = {
-            'LoginName': self.username,
-            'LoginPassword': self.password,  # '%2BHqrhJteMzkF2odX45F0Hw%3D%3D',
-            'VeriType': 'TopLogin',
-            'IsRememberMe': 'false',
-        }
-
-        headers = {
-            'Accept': '*/*',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'zh-CN,zh;q=0.9',
-            'Connection': 'keep-alive',
-            'Content-Length': '178',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Cookie': self.cook,
-            'Host': '210.31.67.135',
-            'Origin': 'http://210.31.67.135',
-            'Referer': 'http://210.31.67.135/',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-
-        r = requests.post(url=url2, headers=headers, data=postdata)
-        r.encoding = 'utf-8'
-        state = r.text
-        print(state)
-        print('登陆时间为：' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
-        print(re.findall('"msg":"(.*?)"', state)[0])
-        self.cook2 = re.findall('(.ASP[\s\S]*?)\sfor', str(r.cookies))[0]
-        return state
-
-    def date(self):
-        date1 = time.time()
-        date = int((date1 - int(time.time())) * 1000)
-        return str(date)
-
-    def mstime(self):
-        ms = str(int(time.time() * 1000))
-        return ms
-
-    def report(self, data):
-        with open('report.txt', 'w') as f:
-            f.write(data.text)
-            f.close()
-        print('已生成预约报告，请查阅')
-
-    def get_date(self, time_interval):
-        """
-        :param date:                    间隔的时间 整型  前几天 为负数 100 后几天为正数 -100
-        :param time_interval:           字符类型时间 年月日   ‘2020-01-01’
-        :return:                        字符类型时间 年月日   ‘2020-01-01’
-        """
-        temp_date = datetime.datetime.now()  # 获取当前时间 年月日时分秒
-        date1 = (temp_date + datetime.timedelta(days=+time_interval)).strftime("%Y-%m-%d")  # 获取当前日期的后一天日期)
-        return date1
-
-    def apply(self):
-        # global GoOn
-        # global cook3
-        times = time.time()
-        ## csrf 传入服务器
-        url = 'http://210.31.67.135/PersonCenter/UserCurrentSkin?date=' + self.date() + '&_=' + self.mstime()
-        csrf = str(int(random.random() * 999999999))
-        self.cook3 = 'cook' + ';' + self.cook2 + ';' + csrf
-        header = {
-            'Accept': 'text/html, */*; q=0.01',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'zh-CN,zh;q=0.9',
-            'Connection': 'keep-alive',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Cookie': self.cook3,
-            'Host': '210.31.67.135',
-            'Referer': 'http://210.31.67.135/PersonCenter?CenterBoxUrl=/Equipment/AppointmentBoxIndex%3Fid%3D' + self.equipmentID + '%26time%3D304',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36',
-            'X-CSRFToken': csrf,
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-        r = requests.get(url=url, headers=header)
-        # print(r.text)
-
-        ## 预约申请 #########################################################################
-        Date = self.date()
-        booktime_demo = '2022-04-08 00:00:00,2022-04-08 01:00:00,2022-04-08 02:00:00,2022-04-08 03:00:00,2022-04-08 04:00:00,2022-04-08 05:00:00,2022-04-08 06:00:00,2022-04-08 07:00:00,2022-04-08 08:00:00,2022-04-08 09:00:00,2022-04-08 10:00:00,2022-04-08 11:00:00,2022-04-08 12:00:00,2022-04-08 13:00:00,2022-04-08 14:00:00,2022-04-08 15:00:00,2022-04-08 16:00:00,2022-04-08 17:00:00,2022-04-08 18:00:00,2022-04-08 19:00:00,2022-04-08 20:00:00,2022-04-08 21:00:00,2022-04-08 22:00:00,2022-04-08 23:00:00'
-        booktime = re.sub(r'\d+-\d+-\d+', self.bookday, booktime_demo)
-        if self.GoOn == 0:
-            print('当前预约的日期为' + re.match('\d+-\d+-\d+', booktime).group())
-        header = {
-            'Accept': 'text/html, */*; q=0.01',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'zh-CN,zh;q=0.9',
-            'Connection': 'keep-alive',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Cookie': self.cook3,
-            'Host': '210.31.67.135',
-            'Referer': 'http://210.31.67.135/Equipment/AppointmentBoxContainer/' + self.equipmentID + '?userParameters=id:' + self.equipmentID + '+csrftoken:' + csrf + 'HTTP_X_CSRFTOKEN:' + csrf + '&amp;date=' + Date,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36',
-            'X-CSRFToken': csrf,
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-        # 获取表格信息 ＋ ID
-        url_list = 'http://210.31.67.135/Appointment/AppointmentUserRelativeInfo'
-        formdata_list = {
-            'equipmentTimeAppointmemtMode': '0',
-            'equipmentId': self.equipmentID,
-            'date': self.date()
-        }
-        # 获取subject ID信息
-        r0 = requests.post(headers=header, url=url_list, data=formdata_list)
-        SubjectId = re.findall('"Id":"(.*?)","Name"', r0.text)[0]
-
-        ## 提交信息
-        formdata0 = {
-            'subjectId': SubjectId,
-            'time': self.date()
-        }
-        formdata = {
-            'isSelectTimeScope': 'false',
-            'beginTime': time.strftime('%Y-%m-%d', time.localtime(time.time())) + ' 0:0',
-            'endTime': time.strftime('%Y-%m-%d', time.localtime(time.time())) + ' 0:0',
-            'EquipmentId': self.equipmentID,
-            'AppointmentTimes': booktime,
-            'SubjectName': self.subject_name,
-            'UsedNature': 'do experiment',
-            'date': self.date()
-        }
-        formdata1 = {
-            'SubjectId': SubjectId,
-            'UseNature': '0',
-            'ExperimentationContent': 'experiment',
-            'isSelectTimeScope': 'false',
-            'beginTime': self.bookday + ' 0:0',
-            'endTime': self.bookday + ' 0:0',
-            'AppointmentStep': '60',
-            'AppointmentTimes': booktime,
-            'EquipmentId': self.equipmentID,
-            'AppointmentFeeTips': 'false'
-        }
-
-        url0 = 'http://210.31.67.135/Subject/GetSubjectProjectList'
-        content = {
-            'subjectId': self.equipmentID,
-            'time': self.date()
-        }
-        url = 'http://210.31.67.135/Appointment/AppointmentTotalInfo'
-        url1 = 'http://210.31.67.135/Appointment/Appointment'
-
-        # requests.post(headers=header, url=url0, data=formdata0)
-        r1 = requests.post(headers=header, url=url, data=formdata)
-        r2 = requests.post(headers=header, url=url1, data=formdata1)
-        # print(r1.text)
-        # report(r1)
-        # print(r2.text)
-        # return r2
-        timee = time.time()
-        if '您的预约已提交,请在预约时间前24小时登录确认' in r2.text:
-            print('预约成功，请前往系统查看')
-            self.result_show.append( '预约成功，请前往系统查看')
-        elif '还未到提前开放预约时间' in r2.text:
-            print('系统提示：还未到提前开放预约时间 \n 即将继续申请...本轮申请时间耗时：%.5f s' % (timee - times))
-            self.result_show.append('系统提示：还未到提前开放预约时间 \n 即将继续申请...本轮申请时间耗时：' + str(timee - times) + ' s')
-            self.GoOn = 1
-        else:
-            print(r2.text)
-            self.result_show.append(r2.text)
-
-    def show_result(self):
-        return self.result_show
-
-    def task_pre(self):
-        self.deal_equipmentID()
-        self.bookday = self.get_date(self.apply_day_later)
-        self.login_pre()
-        self.login()
-        self.GoOn = 0
-
-    def task_run(self):
-        ###程序执行##################################
-        time.sleep(0.1)
-        time1 = time.time()
-        while True:
-            self.apply()
-            time_check = time.time() - time1
-            if self.GoOn == 0:
-                break
-            elif time_check > 180:  # 运行时间超过60秒
-                print('运行时间已达180s，仍未申请成功，请登录网页检查')
-                self.result_show.append('运行时间已达180s，仍未申请成功，请登录网页检查')
-                break
-            else:
-                time.sleep(0.1)
-        self.over = 1
-        time2 = time.time()
-        print('本次预约用时为：' + str(time2 - time1))
-        self.result_show.append('本次预约用时为：' + str(time2 - time1))
-
-    def run_schedule(self):
-        schedule.every().day.at(self.time_pre(self.time_setting)).do(self.task_pre)  # 提前10秒登录
-        schedule.every().day.at(self.time_setting).do(self.task_run)
-        while True:
-            schedule.run_pending()
-            if self.over != 1:
-                time.sleep(1)
-            else:
-                break
-        return self.result_show
+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
